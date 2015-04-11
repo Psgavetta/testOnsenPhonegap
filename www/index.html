@@ -1,74 +1,113 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <title>My App</title>  
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <title>Hello World</title>
+    </head>
+    <body>
+        <div class="app">
+            <h1>Apache Cordova</h1>
+            <div id="deviceready" class="blink">
+                <p class="event listening">Connecting to Device</p>
+                <p class="event received">Device is Ready</p>
+            </div>
 
-  <link rel="stylesheet" href="styles/app.css"/>
-  <link rel="stylesheet" href="lib/onsen/css/onsenui.css">  
-  <link rel="stylesheet" href="lib/onsen/css/onsen-css-components.css">  
+            <h2> Camera Position </h2>
+            <input type="radio" name="deviceposition" id="deviceposition_back" value="Back" onclick="onChangeDevicePosition();"/>
+            <label for="deviceposition_back">Back</label>
+            <br/>
+            <input type="radio" name="deviceposition" id="deviceposition_front" value="Front" onclick="onChangeDevicePosition();"/>
+            <label for="deviceposition_front">Front</label>
 
-  <script type="text/javascript" src="cordova.js"></script>
-  <script src="lib/onsen/js/angular/angular.js"></script>    
-  <script src="lib/onsen/js/onsenui.js"></script>    
-  <script src="js/app.js"></script>
-  <script>
-    var module = ons.bootstrap();
 
-    module.controller('AppCtrl', function($scope) {
-      $scope.pageTitle = 'Page1';
-    });
+            <h2> Flash Mode </h2>
+            <input type="radio" name="flashmode" id="flashmode_off" value="Off" onclick="onChangeFlashMode();"/>
+            <label for="flashmode_off">Off</label>
+            <br/>
+            <input type="radio" name="flashmode" id="flashmode_on" value="On" onclick="onChangeFlashMode();"/>
+            <label for="flashmode_on">On</label>
+            <br/>
+            <input type="radio" name="flashmode" id="flashmode_auto" value="Auto" onclick="onChangeFlashMode();"/>
+            <label for="flashmode_auto">Auto</label>
+            <br/>
 
-    ons.ready(function() {
-      console.log("ons.ready");
+            <input type="button" value="Take a picture" onclick="onTakePicture();" />
 
-      navi.on('postPop', function(event) {
-        console.log(event);
-      });
 
-      navi.on('postPush', function(event) {
-        console.log(event);
-      });
-    });
-  </script>
+        </div>
 
-</head>
-<body ng-controller="AppCtrl">
+    <!— camera preview canvas —>
+        <canvas id="camera" width="352" height="288" style="border:2px"></canvas>
 
-  <ons-navigator ng-cloak var="navi">
-    <ons-page>
-      <ons-toolbar>
-        <div class="left"></div>
-        <div class="center">{{pageTitle}}</div>
-        <div class="right"><ons-toolbar-button>Label</ons-toolbar-button></div> 
-      </ons-toolbar>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript">
+            app.initialize();
+        </script>
 
-      <div style="text-align: center">
-        <br>
-        <ons-button ng-click="navi.pushPage('page2.html')">Push Page</ons-button>
-      </div>
+        <script>
+            document.addEventListener("deviceready", function() {
+                                          canvasMain = document.getElementById("camera");
+                                          CanvasCamera.initialize(canvasMain);
+                                          // define options
+                                          var opt = {
+                                              quality: 75,
+                                              destinationType: CanvasCamera.DestinationType.DATA_URL,
+                                              encodingType: CanvasCamera.EncodingType.JPEG,
+                                              saveToPhotoAlbum:true,
+                                              correctOrientation:true,
+                                              width:640,
+                                              height:480
+                                          };
+                                          CanvasCamera.start(opt);
+                                      });
 
-      <ons-bottom-toolbar>
-        <div class="bottom-bar__line-height" style="text-align: center;">Bottom toolbar</div>
-      </ons-bottom-toolbar>
-    </ons-page>
-  </ons-navigator>
+            function onChangeDevicePosition() {
 
-  <ons-template id="page2.html">
-    <ons-toolbar>
-      <div class="left"><ons-back-button>Back</ons-back-button></div> 
-      <div class="center">Page2</div> 
-      <div class="right"></div>
-    </ons-toolbar>
+                var newDevicePosition = CanvasCamera.CameraPosition.BACK;
+                if (document.getElementById("deviceposition_back").checked)
+                {
+                    newDevicePosition = CanvasCamera.CameraPosition.BACK;
+                }
+                else if (document.getElementById("deviceposition_front").checked)
+                {
+                    newDevicePosition = CanvasCamera.CameraPosition.FRONT;
+                }
+                //
+                CanvasCamera.setCameraPosition(newDevicePosition);
+            }
 
-    <div style="text-align: center">
-      <br>
-      <ons-button ng-click="navi.popPage()">Pop</ons-button>
-      <ons-button ng-click="navi.pushPage('page2.html')">Push</ons-button>
-    </div>
-  </ons-template>
- 
-</body>
+            function onChangeFlashMode() {
+
+                var newFlashMode = CanvasCamera.FlashMode.OFF;
+                if (document.getElementById("flashmode_off").checked)
+                {
+                    newFlashMode = CanvasCamera.FlashMode.OFF;
+                }
+                else if (document.getElementById("flashmode_on").checked)
+                {
+                    newFlashMode = CanvasCamera.FlashMode.ON;
+                }
+                else if (document.getElementById("flashmode_auto").checked)
+                {
+                    newFlashMode = CanvasCamera.FlashMode.AUTO;
+                }
+
+                CanvasCamera.setFlashMode(newFlashMode);
+            }
+
+            function onTakePicture() {
+                CanvasCamera.takePicture(onTakeSuccess);
+            }
+
+            function onTakeSuccess(data) {
+                //
+            }
+        </script>
+    </body>
 </html>
